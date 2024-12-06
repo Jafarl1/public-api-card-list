@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { RootState } from "../../redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setProducts, setLoading, setError } from "../../redux/productsSlice";
-import { useNavigate } from "react-router-dom";
 import Loader from "../../components/loader/Loader";
 import ProductCard from "../../components/productCard/ProductCard";
-import { RootState } from "../../redux/store";
 import CustomError from "../../components/error/CurstomError";
+import { fetchProductsFromApi } from "../../services/api";
 
 const ProductsList = () => {
   const dispatch = useDispatch();
@@ -16,26 +17,25 @@ const ProductsList = () => {
 
   const [filter, setFilter] = useState("all");
 
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [currentPage, setCurrentPage] = useState(1);
+
   useEffect(() => {
     if (products.length === 0) {
-      const fetchData = async () => {
+      const loadProducts = async () => {
         try {
           dispatch(setLoading(true));
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/products`
-          );
-
-          const data = await response.json();
+          const data = await fetchProductsFromApi();
           dispatch(setProducts(data));
-          dispatch(setLoading(false));
         } catch (error) {
           console.error(error);
           dispatch(setError("Failed to fetch products."));
+        } finally {
           dispatch(setLoading(false));
         }
       };
 
-      fetchData();
+      loadProducts();
     }
   }, [dispatch, products.length]);
 
@@ -58,7 +58,7 @@ const ProductsList = () => {
       <div className="flex justify-center items-center gap-5 mt-8">
         <div className="border border-sky-950 rounded-md">
           <select
-            className="h-9 px-2 bg-slate-50 rounded outline-none cursor-pointer shadow-md"
+            className="h-9 px-2 bg-slate-50 text-sky-950 rounded outline-none cursor-pointer shadow-md"
             value={filter}
             onChange={handleFilterChange}
           >
@@ -67,7 +67,7 @@ const ProductsList = () => {
           </select>
         </div>
         <button
-          className="h-9 px-3 border border-sky-950 bg-slate-50 rounded shadow-md"
+          className="h-9 px-3 border border-sky-950 text-sky-950 bg-slate-50 rounded shadow-md"
           onClick={handleCreateProduct}
         >
           Create Product
@@ -76,11 +76,14 @@ const ProductsList = () => {
 
       <ul className="flex flex-wrap justify-center p-8 gap-8">
         {filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <li key={product.id}>
-              <ProductCard product={product} />
-            </li>
-          ))
+          filteredProducts
+            .slice()
+            .reverse()
+            .map((product) => (
+              <li key={product.id}>
+                <ProductCard product={product} />
+              </li>
+            ))
         ) : (
           <div>No products available.</div>
         )}

@@ -7,7 +7,7 @@ import CreateProduct from "./components/createProduct/CreateProduct";
 
 const App = () => {
   return (
-    <>
+    <div className="w-full min-h-screen bg-slate-200">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -15,7 +15,7 @@ const App = () => {
         <Route path="/products/:id" element={<ProductPage />} />
         <Route path="/create-product" element={<CreateProduct />} />
       </Routes>
-    </>
+    </div>
   );
 };
 

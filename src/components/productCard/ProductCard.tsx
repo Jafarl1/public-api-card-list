@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addToFavorites,
@@ -5,11 +6,14 @@ import {
   removeProduct,
 } from "../../redux/productsSlice";
 import { RootState } from "../../redux/store";
+import { deleteProductFromApi } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import favIcon from "../../assets/icons/fav_icon.png";
 import favIconFilled from "../../assets/icons/fav_icon_filled.png";
 import removeIcon from "../../assets/icons/remove_icon.png";
 import { IProduct } from "../../interfaces/productInterfaces";
+import Swal from "sweetalert2";
+import { PropagateLoader } from "react-spinners";
 
 interface ProductCardProps {
   product: IProduct;
@@ -22,6 +26,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const isFavorite = favorites.some(
     (favProduct) => favProduct.id === product.id
   );
+  const [loading, setLoading] = useState(false);
 
   const toggleFavorite = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -32,12 +37,46 @@ const ProductCard = ({ product }: ProductCardProps) => {
     }
   };
 
-  const handleDelete = (event: React.MouseEvent) => {
+  const handleDelete = async (event: React.MouseEvent) => {
     event.stopPropagation();
-    dispatch(removeProduct(product.id));
-    if (isFavorite) {
-      dispatch(removeFromFavorites(product.id));
-    }
+    Swal.fire({
+      title: "Are you sure?",
+      text: `You are going to delete a product - ${product.title}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#075985",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setLoading(true);
+          await deleteProductFromApi(product.id);
+          dispatch(removeProduct(product.id));
+
+          if (isFavorite) {
+            dispatch(removeFromFavorites(product.id));
+          }
+
+          Swal.fire({
+            title: "Deleted!",
+            text: "The product has been deleted.",
+            icon: "success",
+            confirmButtonColor: "#02bd02",
+          });
+        } catch (error) {
+          console.error(error);
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to delete the product.",
+            icon: "error",
+            confirmButtonColor: "#d33",
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const handleCardClick = () => {
@@ -46,7 +85,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <div
-      className="w-96 py-5 h-auto border border-sky-800 rounded-lg shadow-lg cursor-pointer relative"
+      className="w-96 py-5 h-auto bg-white rounded-lg shadow-lg cursor-pointer overflow-hidden relative"
       onClick={handleCardClick}
     >
       <div className="h-[400px] p-6 flex justify-center items-center">
@@ -74,6 +113,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onClick={toggleFavorite}
         />
       </div>
+
       <div>
         <img
           src={removeIcon}
@@ -82,6 +122,12 @@ const ProductCard = ({ product }: ProductCardProps) => {
           onClick={handleDelete}
         />
       </div>
+
+      {loading ? (
+        <div className="w-full h-full bg-opacity-80 bg-sky-950 absolute top-0 left-0 flex justify-center items-center">
+          <PropagateLoader color="#ffffff" />
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -6,7 +6,9 @@ import { setLoading, addProduct } from "../../redux/productsSlice";
 import Loader from "../loader/Loader";
 import { IProduct } from "../../interfaces/productInterfaces";
 import { nanoid } from "nanoid";
+import { fetchCategories, createProduct } from "../../services/api";
 import CustomError from "../error/CurstomError";
+import Swal from "sweetalert2";
 
 const CreateProduct = () => {
   const dispatch = useDispatch();
@@ -41,11 +43,11 @@ const CreateProduct = () => {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<
+    event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
-    const { name, value } = e.target;
+    const { name, value } = event.target;
     setFormData({
       ...formData,
       [name]: value,
@@ -91,24 +93,63 @@ const CreateProduct = () => {
     return isValid;
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const resetForm = () => {
+    setFormData({
+      id: nanoid(),
+      title: "",
+      price: "",
+      category: "",
+      description: "",
+      image: "",
+      rating: {
+        count: "",
+        rate: "",
+      },
+    });
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (validate()) {
       dispatch(addProduct(formData));
-      navigate("/");
+
+      try {
+        const data = await createProduct(formData);
+        if (data) {
+          Swal.fire({
+            title: "Good job!",
+            text: "You added a new product!",
+            icon: "success",
+            showCancelButton: true,
+            confirmButtonText: "Go to products page",
+            confirmButtonColor: "#02bd02",
+            cancelButtonText: "Stay here",
+            cancelButtonColor: "#075985",
+          }).then((result) => {
+            resetForm();
+            if (result.isConfirmed) {
+              navigate("/products");
+            }
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to add the product.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+        });
+      }
     }
   };
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchCategoriesData = async () => {
       try {
         dispatch(setLoading(true));
-        const response = await fetch(
-          `${import.meta.env.VITE_API_URL}/products/categories`
-        );
-
-        const data = await response.json();
+        const data = await fetchCategories();
         setAvailableCategories(data);
         dispatch(setLoading(false));
       } catch (error) {
@@ -118,7 +159,7 @@ const CreateProduct = () => {
       }
     };
 
-    fetchCategories();
+    fetchCategoriesData();
   }, [dispatch]);
 
   if (loading) return <Loader />;

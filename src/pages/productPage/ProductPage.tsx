@@ -51,10 +51,10 @@ const ProductPage = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="flex flex-col items-center gap-12 py-10">
+    <div className="flex flex-col min-h-screen bg-white items-center gap-12 py-10">
       <div className="w-[840px]">
         <button
-          className="border border-slate-900 bg-white-50 py-2 px-5 rounded-md text-slate-900 shadow-md"
+          className="border border-slate-900 bg-white py-2 px-5 rounded-md text-slate-900 shadow-md"
           onClick={handleNavigateBack}
         >
           Back to all products
