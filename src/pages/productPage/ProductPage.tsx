@@ -36,7 +36,7 @@ const ProductPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white items-center gap-12 py-10">
-      <div className="w-[840px]">
+      <div className="w-full pl-7 lg:w-[840px] lg:pl-0">
         <button
           className="border border-slate-900 bg-white py-2 px-5 rounded-md text-slate-900 shadow-md"
           onClick={handleNavigateBack}
@@ -45,11 +45,11 @@ const ProductPage = () => {
         </button>
       </div>
       {product ? (
-        <div className="flex justify-center px-40 gap-12">
-          <div className="w-[400px] flex justify-end items-center">
+        <div className="flex flex-col lg:flex-row justify-center px-7 lg:px-40 gap-16">
+          <div className="w-4/6 mx-auto lg:w-[400px] flex justify-end items-center">
             <img src={product.image} alt={product.title} />
           </div>
-          <div className="w-[440px] flex flex-col justify-center border-l-2 border-sky-950 pl-8">
+          <div className="w-full lg:w-[440px] flex flex-col justify-center border-l-2 border-sky-950 pl-8">
             <h1 className="text-5xl pb-3 font-bold mb-10 border-b-2 border-sky-950 text-slate-950">
               {product.title}
             </h1>

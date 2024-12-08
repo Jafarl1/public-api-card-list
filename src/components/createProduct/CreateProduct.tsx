@@ -153,7 +153,7 @@ const CreateProduct = () => {
   if (fetchError) return <CustomError error={fetchError} />;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white border rounded-lg shadow-md mt-10">
+    <div className="max-w-2xl mx-2 sm:mx-auto p-6 bg-white border rounded-lg shadow-md mt-12  ">
       <h2 className="text-2xl font-semibold text-center mb-6">
         Create New Product
       </h2>
@@ -264,7 +264,7 @@ const CreateProduct = () => {
           )}
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-4">
+        <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="ratingRate"
