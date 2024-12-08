@@ -6,9 +6,9 @@ import { setLoading, addProduct } from "../../redux/productsSlice";
 import Loader from "../loader/Loader";
 import { IProduct } from "../../interfaces/productInterfaces";
 import { nanoid } from "nanoid";
-import { fetchCategories, createProduct } from "../../services/api";
+import { fetchCategoriesFromApi, createProduct } from "../../services/api";
 import CustomError from "../error/CurstomError";
-import Swal from "sweetalert2";
+import { addedProductAlert, errorAlert } from "../../alerts/swal";
 
 const CreateProduct = () => {
   const dispatch = useDispatch();
@@ -65,27 +65,27 @@ const CreateProduct = () => {
     let isValid = true;
 
     if (!formData.title) {
-      newErrors.title = "Title is required";
+      newErrors.title = "Title is required!";
       isValid = false;
     }
 
     if (!formData.description) {
-      newErrors.description = "Description is required";
+      newErrors.description = "Description is required!";
       isValid = false;
     }
 
     if (+formData.price <= 0) {
-      newErrors.price = "Price must be greater than 0";
+      newErrors.price = "Price must be greater than 0!";
       isValid = false;
     }
 
     if (!formData.image) {
-      newErrors.image = "Image URL is required";
+      newErrors.image = "Image URL is required!";
       isValid = false;
     }
 
     if (!formData.category) {
-      newErrors.category = "Category is required";
+      newErrors.category = "Category is required!";
       isValid = false;
     }
 
@@ -117,16 +117,7 @@ const CreateProduct = () => {
       try {
         const data = await createProduct(formData);
         if (data) {
-          Swal.fire({
-            title: "Good job!",
-            text: "You added a new product!",
-            icon: "success",
-            showCancelButton: true,
-            confirmButtonText: "Go to products page",
-            confirmButtonColor: "#02bd02",
-            cancelButtonText: "Stay here",
-            cancelButtonColor: "#075985",
-          }).then((result) => {
+          addedProductAlert().then((result: { isConfirmed: boolean }) => {
             resetForm();
             if (result.isConfirmed) {
               navigate("/products");
@@ -135,12 +126,7 @@ const CreateProduct = () => {
         }
       } catch (error) {
         console.error(error);
-        Swal.fire({
-          title: "Error!",
-          text: "Failed to add the product.",
-          icon: "error",
-          confirmButtonColor: "#d33",
-        });
+        errorAlert("Failed to add the product.");
       }
     }
   };
@@ -149,12 +135,12 @@ const CreateProduct = () => {
     const fetchCategoriesData = async () => {
       try {
         dispatch(setLoading(true));
-        const data = await fetchCategories();
+        const data = await fetchCategoriesFromApi();
         setAvailableCategories(data);
-        dispatch(setLoading(false));
       } catch (error) {
         console.error(error);
         setFetchError("Failed to fetch available categories.");
+      } finally {
         dispatch(setLoading(false));
       }
     };

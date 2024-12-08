@@ -1,52 +1,36 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
 import { IProduct } from "../../interfaces/productInterfaces";
 import Loader from "../../components/loader/Loader";
 import CustomRating from "../../components/ratingStars/CustomRating";
 import CustomError from "../../components/error/CurstomError";
+import { fetchProductInfoFromApi } from "../../services/api";
 
 const ProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const products = useSelector((state: RootState) => state.products.products);
-  const [product, setProductState] = useState<IProduct | null>(null);
-  const [loading, setLoadingState] = useState(true);
+  const [product, setProduct] = useState<IProduct | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const productFromStore = products.find((prod) => prod.id === id);
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchProductInfoFromApi(id || "");
+        setProduct(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    if (productFromStore) {
-      setProductState(productFromStore);
-      setLoadingState(false);
-    } else {
-      const fetchProduct = async () => {
-        try {
-          setLoadingState(true);
-          const response = await fetch(
-            `${import.meta.env.VITE_API_URL}/products/${id}`
-          );
-          const data = await response.json();
-          setProductState(data);
-          setLoadingState(false);
-        } catch (error) {
-          console.error(error);
-          setLoadingState(false);
-        }
-      };
-
-      fetchProduct();
-    }
-  }, [id, products, dispatch]);
+    fetchProduct();
+  }, [id]);
 
   const handleNavigateBack = () => {
     navigate("/products");
   };
-
-  console.log(product);
 
   if (loading) return <Loader />;
 

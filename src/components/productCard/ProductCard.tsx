@@ -12,8 +12,8 @@ import favIcon from "../../assets/icons/fav_icon.png";
 import favIconFilled from "../../assets/icons/fav_icon_filled.png";
 import removeIcon from "../../assets/icons/remove_icon.png";
 import { IProduct } from "../../interfaces/productInterfaces";
-import Swal from "sweetalert2";
 import { PropagateLoader } from "react-spinners";
+import confirmDeletion, { deletedAlert, errorAlert } from "../../alerts/swal";
 
 interface ProductCardProps {
   product: IProduct;
@@ -39,44 +39,28 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const handleDelete = async (event: React.MouseEvent) => {
     event.stopPropagation();
-    Swal.fire({
-      title: "Are you sure?",
-      text: `You are going to delete a product - ${product.title}`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#075985",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          setLoading(true);
-          await deleteProductFromApi(product.id);
-          dispatch(removeProduct(product.id));
+    confirmDeletion(product.title).then(
+      async (result: { isConfirmed: boolean }) => {
+        if (result.isConfirmed) {
+          try {
+            setLoading(true);
+            await deleteProductFromApi(product.id);
+            dispatch(removeProduct(product.id));
 
-          if (isFavorite) {
-            dispatch(removeFromFavorites(product.id));
+            if (isFavorite) {
+              dispatch(removeFromFavorites(product.id));
+            }
+
+            deletedAlert();
+          } catch (error) {
+            console.error(error);
+            errorAlert("Failed to delete the product.");
+          } finally {
+            setLoading(false);
           }
-
-          Swal.fire({
-            title: "Deleted!",
-            text: "The product has been deleted.",
-            icon: "success",
-            confirmButtonColor: "#02bd02",
-          });
-        } catch (error) {
-          console.error(error);
-          Swal.fire({
-            title: "Error!",
-            text: "Failed to delete the product.",
-            icon: "error",
-            confirmButtonColor: "#d33",
-          });
-        } finally {
-          setLoading(false);
         }
       }
-    });
+    );
   };
 
   const handleCardClick = () => {

@@ -7,7 +7,7 @@ export const fetchProductsFromApi = async () => {
     return data;
   } catch (error: unknown) {
     if (error instanceof Error) {
-      throw new Error(error.message || "Something went wrong");
+      throw new Error(error.message || "Failed to fetch products from Api.");
     }
   }
 };
@@ -25,12 +25,12 @@ export const deleteProductFromApi = async (id: string) => {
     return data;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(error.message || "Something went wrong");
+      throw new Error(error.message || "Failed to delete product.");
     }
   }
 };
 
-export const fetchCategories = async () => {
+export const fetchCategoriesFromApi = async () => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/products/categories`
@@ -39,7 +39,7 @@ export const fetchCategories = async () => {
     return await response.json();
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(error.message || "Failed to fetch categories");
+      throw new Error(error.message || "Failed to fetch categories from Api.");
     }
   }
 };
@@ -57,7 +57,22 @@ export const createProduct = async (productData: IProduct) => {
     return await response.json();
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(error.message || "Failed to create product");
+      throw new Error(error.message || "Failed to create product.");
+    }
+  }
+};
+
+export const fetchProductInfoFromApi = async (id: string) => {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_URL}/products/${id}`
+    );
+    return await response.json();
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(
+        error.message || "Failed to fetch product info from Api."
+      );
     }
   }
 };
